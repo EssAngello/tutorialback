@@ -63,28 +63,8 @@ public class LoanServiceImpl implements LoanService{
     @Override
     public void save(Long id, LoanDto data) {
 
-        List<Loan> loans  = this.findAll();
-
-        /*System.out.println(data.getClient().getName() + " : " + data.getGame().getTitle());
-        System.out.println("-----------------------------------------------------------------------");
-
-        for(Loan loanx : loans)
-        {
-            System.out.println(loanx.getClient().getName() + " : " + loanx.getGame().getTitle());
-        }*/
-
-        for(Loan loan2:loans){
-
-            if( data.getId()!=loan2.getId() && ((data.getGame().getId()==loan2.getGame().getId()) ||  (data.getClient().getId()==loan2.getClient().getId())))
-            {
-                /*System.out.println(data.getClient().getName() + " : " + data.getGame().getTitle());
-                System.out.println("-----------------------------------------------------------------------");
-                System.out.println(loan2.getClient().getName() + " : " + loan2.getGame().getTitle());*/
-                if( (data.getStartDate().after(loan2.getStartDate()) &&  data.getStartDate().before(loan2.getEndDate()) )  ||     (data.getEndDate().after(loan2.getStartDate()) &&  data.getEndDate().before(loan2.getEndDate()) )) {
-                    return;
-                }
-            }
-        }
+        if(!loanIsPossible(data))
+            return;
 
         Loan loan = null;
         if (id != null)
@@ -99,6 +79,22 @@ public class LoanServiceImpl implements LoanService{
         loan.setGame(gameService.get(data.getGame().getId()));
 
         this.loanRepository.save(loan);
+    }
+
+    public boolean loanIsPossible(LoanDto data){
+        List<Loan> loans  = this.findAll();
+
+        for(Loan loan2:loans){
+
+            if( data.getId()!=loan2.getId() && ((data.getGame().getId()==loan2.getGame().getId()) ||  (data.getClient().getId()==loan2.getClient().getId())))
+            {
+                if( (data.getStartDate().after(loan2.getStartDate()) &&  data.getStartDate().before(loan2.getEndDate()) )  ||     (data.getEndDate().after(loan2.getStartDate()) &&  data.getEndDate().before(loan2.getEndDate()) )) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
